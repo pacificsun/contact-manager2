@@ -1,57 +1,52 @@
-import React, {Component} from 'react';
+import React, { Component } from "react";
+import axios from "axios";
 
 const Context = React.createContext();
 
 const reducer = (state, action) => {
-
-  switch(action.type){
-      case 'DELETE_CONTACT':
-          return {
-              ...state, /*suru ma bahira nikalera ani tesmathi operation garna*/
-              contacts: state.contacts.filter(contacts => contacts.id !== action.payload)
-          };
-     case 'ADD_CONTACT':
-            return {
-                ...state, /*suru ma bahira nikalera ani tesmathi operation garna*/
-                contacts: [action.payload, ...state.contacts] /*??*/
-            };
-      default:
-          return state;
-
+  switch (action.type) {
+    case "DELETE_CONTACT":
+      return {
+        ...state /*suru ma bahira nikalera ani tesmathi operation garna*/,
+        contacts: state.contacts.filter(
+          contacts => contacts.id !== action.payload
+        )
+      };
+    case "ADD_CONTACT":
+      return {
+        ...state /*suru ma bahira nikalera ani tesmathi operation garna*/,
+        contacts: [action.payload, ...state.contacts] /*??*/
+      };
+    case "UPDATE_CONTACT":
+      return {
+        ...state,
+        contacts: state.contacts.map(contact =>
+          contact.id === action.payload.id
+            ? (contact = action.payload)
+            : contact
+        )
+      };
+    default:
+      return state;
   }
 };
 
 export class Provider extends Component {
-    state = {
-        contacts: [
-            {
-                id: 1,
-                name: "Suraj Thapa",
-                email: "stsurajst@gmail.com",
-                address: "Kathmandu"
-            },
-            {
-                id: 2,
-                name: "Pooja Thapa",
-                email: "po@gmail.com",
-                address: "Kathmandu"
-            },
-            {
-                id: 3,
-                name: "Prabin Thapa",
-                email: "prabin@gmail.com",
-                address: "Kathmandu"
-            }
-        ],
-        dispatch : action => this.setState(state =>reducer(state, action))
-    };
+  state = {
+    contacts: [],
+    dispatch: action => this.setState(state => reducer(state, action))
+  };
+  async componentDidMount() {
+    const res = await axios.get("https://jsonplaceholder.typicode.com/users");
+    this.setState({ contacts: res.data });
+  }
 
-    render(){
-        return(
-            <Context.Provider value={this.state}>
-                {this.props.children}
-            </Context.Provider>
-        )
-    }
+  render() {
+    return (
+      <Context.Provider value={this.state}>
+        {this.props.children}
+      </Context.Provider>
+    );
+  }
 }
 export const Consumer = Context.Consumer;
